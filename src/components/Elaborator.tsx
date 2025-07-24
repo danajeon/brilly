@@ -1,9 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const FlashcardElaborator = () => {
-  const [flashcardContent, setFlashcardContent] = useState('');
-  const [elaboration, setElaboration] = useState('');
+interface ElaboratorProps {
+    flashcardContent: string;
+    ai: string | null;
+    cardId: string | undefined;
+    onSaveElaboration: (cardId: string, elaborationText: string) => void; // Void indicates function does not return a value
+}
+
+
+const Elaborator = ({ flashcardContent, cardId, ai, onSaveElaboration }: ElaboratorProps) => {
+  // const [flashcardContent, setFlashcardContent] = useState('');
+  const [elaboration, setElaboration] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Reset elaboration & auto-show existing ai when card changes
+    useEffect(() => {
+        if (ai) {
+            setElaboration(ai);
+        } else {
+            setElaboration(null);
+        }
+    }, [flashcardContent, ai]);
 
   const handleElaborate = async (text: string) => {
     setLoading(true);
@@ -27,6 +44,12 @@ const FlashcardElaborator = () => {
 
       const data = await response.json();
       setElaboration(data.elaboration);
+
+      // Save using the passed-in handler
+      if (cardId) {
+        onSaveElaboration(cardId, data.elaboration);
+      }
+
     } catch (error) {
       console.error("Error calling Supabase function:", error);
       setElaboration("Failed to get elaboration. Please try again.");
@@ -37,28 +60,31 @@ const FlashcardElaborator = () => {
 
   return (
     <div className="p-4 max-w-md mx-auto border rounded-lg shadow-md space-y-4">
-      <h2 className="text-xl font-semibold">Flashcard</h2>
-      <input
+      <h2 className="text-xl font-semibold">Elaborate with AI</h2>
+      {/* <input
         type="text"
         value={flashcardContent}
         onChange={(e) => setFlashcardContent(e.target.value)}
         className="w-full p-2 border rounded"
-      />
+      /> */}
       <button
         onClick={() => handleElaborate(flashcardContent)}
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         disabled={loading}
       >
-        {loading ? 'Elaborating...' : 'Elaborate with AI'}
+        {loading ? 'Running...' : 'Run'}
       </button>
-      {elaboration && (
         <div className="mt-4 p-3 border bg-gray-50 rounded">
           <h3 className="font-medium">Elaboration:</h3>
-          <p>{elaboration}</p>
+            {elaboration && (
+              <p>{elaboration}</p>
+            )}
+            {!elaboration && (
+              <p>No elaboration yet.</p>
+            )}
         </div>
-      )}
     </div>
   );
 };
 
-export default FlashcardElaborator;
+export default Elaborator;

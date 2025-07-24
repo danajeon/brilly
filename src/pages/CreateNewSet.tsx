@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
 
 // Info needed to connect to Supabase
@@ -14,6 +15,8 @@ interface Card {
 }
 
 export default function CreateNewSet() {
+  const navigate = useNavigate();
+
   const [title, setTitle] = useState("");
   const [cards, setCards] = useState<Card[]>([{ front: "", back: "" }]);
   const [loading, setLoading] = useState(false);
@@ -55,7 +58,7 @@ export default function CreateNewSet() {
       // Creates cardSet row within database
       const { data: cardSetData, error: cardSetError } = await supabase
         .from("cardSets")
-        .insert([{ title, id: `cdst${Date.now()}` }])
+        .insert([{ title, id: `cdst${crypto.randomUUID()}`, quantity: cards.length }])
         .select()
         .single();
 
@@ -65,12 +68,13 @@ export default function CreateNewSet() {
 
       // Assigns ID, front & back, cardSet ID for every card
       const { error: cardsError } = await supabase.from("cards").insert(
-        cards.map((card) => ({
+        cards.map((card, i) => ({
           id: `cd${crypto.randomUUID()}`,
           front: card.front,
           back: card.back,
           cardSet: cardSetData.id,
           ai: null,
+          index: i,
         }))
       );
 
@@ -99,6 +103,7 @@ export default function CreateNewSet() {
 
     finally {
       setLoading(false);
+      navigate('/')
     }
   };
 
