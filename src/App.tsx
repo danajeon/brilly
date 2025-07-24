@@ -1,13 +1,19 @@
 import './App.css'
-import FlashcardElaborator from './components/Elaborator'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import Flashcards from "./pages/Flashcards";
+import CreateNewSet from './pages/CreateNewSet';
 
 function App() {
-
   return (
-    <>
-      <FlashcardElaborator />
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/flashcards/:postId" element={<Flashcards />} />
+        <Route path="/createnewset" element={<CreateNewSet />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

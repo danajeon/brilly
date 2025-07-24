@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
 
 // Info needed to connect to Supabase
@@ -10,12 +11,19 @@ const supabase = createClient(
 // Interface allows declaration merging
 interface CardSet {
   id: string;
+  created: string;
   title: string;
   user: string;
+  quantity: number;
 }
 
 export default function Dashboard() {
   const [cardSetArray, setCardSetArray] = useState<CardSet[]>([]);
+  const [hoveredCardSet, setHoveredCardSet] = useState<CardSet | null>(null)
+
+  const isoTime = (hoveredCardSet ? new Date(hoveredCardSet.created).toLocaleDateString() : null)
+
+  const navigate = useNavigate();
 
   // Pulls up cardSets as soon as page renders
   // Runs only once because dependency is empty
@@ -36,10 +44,22 @@ export default function Dashboard() {
     fetchCardSets();
   }, []);
 
+  const handleCardSetClick = (cardSetId: string) => {
+    navigate(`/flashcards/${cardSetId}`)
+  }
+
+  const handleCreateNewSet = () => {
+    navigate('/createnewset')
+  }
+
   return (
     <div className="min-h-screen p-4 bg-[hotpink]">
       <h1 className="text-xl font-bold mb-4">Dashboard</h1>
       <div className="space-y-2">
+        <button
+          onClick={() => handleCreateNewSet()}>
+          Create New Set +
+        </button>
         {cardSetArray.length === 0 && (
           <p className="text-gray-700">No card sets found.</p>
         )}
@@ -47,11 +67,17 @@ export default function Dashboard() {
           <div
             key={cardSet.id}
             className="p-4 border border-fuchsia-500 rounded bg-white shadow"
-          >
+            onClick={() => handleCardSetClick(cardSet.id)}
+            onMouseEnter={() => setHoveredCardSet(cardSet)}>
             <p className="text-lg font-medium">{cardSet.title}</p>
             <p className="text-sm text-gray-500">User: {cardSet.user}</p>
           </div>
         ))}
+      </div>
+      <div>
+        <p>{hoveredCardSet?.title}</p>
+        <p>{isoTime}</p>
+        <p>number of cards: {hoveredCardSet?.quantity}</p>
       </div>
     </div>
   );
