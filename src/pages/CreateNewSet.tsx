@@ -124,68 +124,69 @@ export default function CreateNewSet() {
   return (
     <div className="h-screen overflow-y-hidden">
       <NavBar />
-      <div className="h-full w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
-        <div className="min-h-[95%] min-w-[75%]">
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
+        <div className="h-[95%] min-w-[75%]">
           <div className="flex flex-row justify-start">
             <h1 className="text-3xl text-[#004D7C] font-semibold mb-4">Create New Set</h1>
           </div>
-          <div className="h-[75%] w-full bg-white rounded-lg shadow-xl p-6 overflow-scroll">
-            <div className="mb-4">
+          <div className="h-[70%] w-full bg-white rounded-lg shadow-xl p-6">
+            <div className="mb-2">
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full bg-zinc-200 rounded-lg p-2"
               />
-              <span className="text-xl font-semibold text-[#004D7C]">Title</span>
+              <span className="text-lg font-semibold text-[#004D7C]">Title</span>
             </div>
-
-            {cards.map((card, index) => (
-              <div className="flex justify-between flex-row w-full">
-                <div key={index} className="flex flex-1 bg-[#88B1CA] rounded-lg shadow-md my-4">
-                  <p className="flex w-[5%] justify-center items-center text-2xl font-semibold text-[#004D7C] ml-3">{index + 1}</p>
-                  <div className="flex justify-between w-[95%] gap-3 m-3">
-                    <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
-                      <input
-                        type="text"
-                        value={card.front}
-                        onChange={(e) => handleCardChange(index, "front", e.target.value)}
-                        className=" w-full bg-zinc-200 rounded p-2"
-                      />
-                      <span className="text-sm font-semibold">Front</span>
-                    </div>
-                    <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
-                      <input
-                        type="text"
-                        value={card.back}
-                        onChange={(e) => handleCardChange(index, "back", e.target.value)}
-                        className=" w-full bg-zinc-200 rounded p-2"
-                      />
-                      <span className="text-sm font-semibold">Back</span>
+            <div className="h-[80%] px-4 overflow-scroll">
+              {cards.map((card, index) => (
+                <div className="flex justify-between flex-row w-full">
+                  <div key={index} className="flex flex-1 bg-[#88B1CA] rounded-lg shadow-md my-1">
+                    <p className="flex w-[3%] justify-center items-center text-lg font-semibold text-[#004D7C] ml-3">{index + 1}</p>
+                    <div className="flex justify-between w-[95%] gap-3 m-2">
+                      <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
+                        <textarea
+                          
+                          value={card.front}
+                          onChange={(e) => handleCardChange(index, "front", e.target.value)}
+                          className="w-full bg-zinc-200 rounded p-1 text-sm max-h-[200px] resize-none"
+                        />
+                        <span className="text-sm font-semibold">Front</span>
+                      </div>
+                      <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
+                        <textarea
+                          
+                          value={card.back}
+                          onChange={(e) => handleCardChange(index, "back", e.target.value)}
+                          className=" w-full bg-zinc-200 rounded p-1 text-sm max-h-[200px] resize-none"
+                        />
+                        <span className="text-sm font-semibold">Back</span>
+                      </div>
                     </div>
                   </div>
+                  <button
+                    onClick={() => deleteCard(index)}
+                    className="cursor-pointer z-1">
+                    <DeleteForeverIcon
+                      fontSize="large"
+                      className="hover:text-red-500 " />
+                  </button>
                 </div>
-                <button
-                  onClick={() => deleteCard(index)}
-                  className="cursor-pointer z-1">
-                  <DeleteForeverIcon
-                    fontSize="large"
-                    className="hover:text-red-500 " />
-                </button>
-              </div>
-            ))}
+              ))}
 
-            <button
-              onClick={addNewCard}
-              className="w-full border-3 border-[#88B1CA] rounded-lg text-[#88B1CA] text-xl font-semibold p-2 mb-4 hover:bg-blue-200 cursor-pointer"
-            >
-              Add New +
-            </button>
+              <button
+                onClick={addNewCard}
+                className="w-full border-3 border-[#88B1CA] rounded-lg text-[#88B1CA] text-lg font-semibold p-2 mt-4 mb-4 hover:bg-blue-200 cursor-pointer"
+              >
+                Add New +
+              </button>
+            </div>
           </div>
           <button
             onClick={handleCreate}
             disabled={loading}
-            className="w-full bg-[#004D7C] text-white text-lg font-semibold rounded-lg shadow-xl mt-4 mb-8 p-2 hover:bg-white hover:text-[#004D7C] border-[#004D7C] disabled:opacity-50 cursor-pointer"
+            className="w-full bg-[#004D7C] text-white text-lg font-semibold rounded-lg shadow-xl mt-4 mb-8 p-3 hover:bg-white hover:text-[#004D7C] border-[#004D7C] disabled:opacity-50 cursor-pointer"
           >
             {loading ? "Creating..." : "Create"}
           </button>
