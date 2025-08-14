@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.webp'
 
 export const NavBar = () => {
       const navigate = useNavigate();
@@ -11,7 +12,7 @@ export const NavBar = () => {
             <div className="flex">
                 <img
                     className="w-[100px] m-2 cursor-pointer"
-                    src="public/logo.webp"
+                    src={logo}
                     alt="logo"
                     onClick={() => handleLogo()}
                 />

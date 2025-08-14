@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useParams } from 'react-router-dom';
+
 import Elaborator from '../components/Elaborator';
+import { NavBar } from '../components/NavBar';
+
+import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
+import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
+import ShuffleIcon from '@mui/icons-material/Shuffle';
+import ShuffleOnIcon from '@mui/icons-material/ShuffleOn';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 // Info needed to connect to Supabase
 const supabase = createClient(
@@ -29,12 +37,19 @@ export default function Flashcards() {
     const [back, setBack] = useState('')
     const [disableForwardButton, setDisableForwardButton] = useState(false)
     const [disableBackButton, setDisableBackButton] = useState(false)
+    const [originalCardsArray, setOriginalCardsArray] = useState<Card[]>([]);
+    const [isShuffled, setIsShuffled] = useState(false);
+
+    //function that takes in cardsArray to shuffle
+    const shuffleArray = (array: Card[]) => {
+        return [...array].sort(() => Math.random() - 0.5);
+    }
 
     useEffect(() => {
         // Fetches cardSet by ID
         async function fetchCardSet() {
             try {
-                const { data, error } = 
+                const { data, error } =
                     await supabase
                         .from("cardSets")
                         .select("*")
@@ -53,14 +68,17 @@ export default function Flashcards() {
         // Fetches all cards in given cardSet
         async function fetchCards() {
             try {
-                const { data, error } = 
+                const { data, error } =
                     await supabase
                         .from("cards")
                         .select("*")
                         .eq("cardSet", cardSetId)
                         .order("index", { ascending: true });
                 if (error) throw error;
-                if (data) setCardsArray(data);
+                if (data) {
+                    setCardsArray(data)
+                    setOriginalCardsArray(data)
+                };
             }
 
             catch (error) {
@@ -117,7 +135,7 @@ export default function Flashcards() {
             .then(({ error }) => {
                 if (error) {
                     console.error('Error saving elaboration to Supabase:', error);
-                } 
+                }
                 else {
                     // Update local state to reflect new elaboration without refresh
                     setCardsArray(prev =>
@@ -129,70 +147,118 @@ export default function Flashcards() {
             });
     };
 
+    // 
+    const handleShuffle = () => {
+        if (isShuffled) {
+            // Un-shuffle
+            setCardsArray(originalCardsArray);
+            setIsShuffled(false);
+            setCardIndex(0);
+        } else {
+            // Shuffle
+            const shuffled = shuffleArray(originalCardsArray);
+            setCardsArray(shuffled);
+            setIsShuffled(true);
+            setCardIndex(0);
+        }
+    }
+
 
     return (
-        <div className='flex flex-row'>
+        <div className={`h-screen overflow-y-hidden ${cardsArray.length > 0 ? 'opacity-100' : 'opacity-0'}`}>
+            <NavBar />
+            <div className="h-[95%] w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
+                <div className="flex flex-row h-full w-[70%] gap-8 mt-8">
+                    {/* left side */}
+                    <div className='h-[80%] w-1/2'>
+                        <h1 className='w-full text-xl text-[#004D7C] font-semibold text-left line-clamp-2 mb-2'>{title}</h1>
+                        <div className='flex justify-center items-center'>
+                            <div className="w-[90%] aspect-5/3 bg-white rounded-md shadow-lg/50">
 
-            {/* left side */}
-            <div className='w-1/2 bg-[lime]'>
-                <h1>{title}</h1>
-                <div className="w-[200px] h-[200px] border">
-
-                    {showFront ?
-                        // CARD FRONT
-                        <div
-                            className="w-full h-full"
-                            onClick={() => setShowFront(false)}>
-                            <span>{front}</span>
+                                {showFront ?
+                                    // CARD FRONT
+                                    <div
+                                        className="w-full h-full flex justify-center items-center text-4xl "
+                                        onClick={() => setShowFront(false)}>
+                                        <span>{front}</span>
+                                    </div>
+                                    :
+                                    // CARD BACK
+                                    <div
+                                        className="w-full h-full flex justify-center items-center text-2xl "
+                                        onClick={() => setShowFront(true)}>
+                                        <span>{back}</span>
+                                    </div>
+                                }
+                            </div>
                         </div>
-                        :
-                        // CARD BACK
-                        <div
-                            className="w-full h-full"
-                            onClick={() => setShowFront(true)}>
-                            <span>{back}</span>
+                        <div className='flex justify-evenly items-center p-2'>
+                            <button
+                                className={`text-[#004D7C] active:scale-90 ${disableBackButton ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
+                                onClick={() => minusOne()}
+                                disabled={disableBackButton}>
+                                <ArrowCircleLeftIcon />
+                            </button>
+                            <span className='font-semibold text-[#004D7C] text-md font-bold'>
+                                {cardIndex + 1}/{cardsArray.length}
+                            </span>
+                            <button
+                                className={`text-[#004D7C] active:scale-90 ${disableForwardButton ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
+                                onClick={() => addOne()}
+                                disabled={disableForwardButton}>
+                                <ArrowCircleRightIcon />
+                            </button>
                         </div>
-                    }
-                </div>
-                <div className='flex justify-evenly'>
-                    <button
-                        className={`bg-[DarkBlue] text-white ${disableBackButton ? 'bg-gray-400 cursor-not-allowed' : 'cursor-pointer'}`}
-                        onClick={() => minusOne()}
-                        disabled={disableBackButton}>
-                        back
-                    </button>
-                    <button
-                        className={`bg-[OrangeRed] ${disableForwardButton ? 'bg-gray-400 cursor-not-allowed' : 'cursor-pointer'}`}
-                        onClick={() => addOne()}
-                        disabled={disableForwardButton}>
-                        forward
-                    </button>
-                </div>
-                {cardsArray.length > 0 && (
-                    <Elaborator
-                        flashcardContent={front}
-                        cardId={cardsArray[cardIndex].id}
-                        ai={cardsArray[cardIndex].ai}
-                        onSaveElaboration={handleSaveElaboration}
-                    />
-                )}
-            </div>
-
-            {/* right side */}
-            <div className='w-1/2 bg-[chartreuse]'>
-                {cardsArray.length === 0 && (
-                    <p className="text-gray-700">No cards found.</p>)}
-                {cardsArray.map((card, i) => (
-                    <div
-                        key={card.id}
-                        className={`cursor-pointer ${i === cardIndex ? 'bg-[blue]' : 'bg-none'}`}
-                        onClick={() => {
-                            setCardIndex(i)
-                        }}>
-                        <p className="text-lg font-medium">{card.front}</p>
-                        <p className="text-sm text-gray-500">{card.back}</p>
+                        <div className='w-full aspect-5/3 rounded-md'>
+                            {cardsArray.length > 0 && (
+                                <Elaborator
+                                    flashcardContent={front}
+                                    cardId={cardsArray[cardIndex].id}
+                                    ai={cardsArray[cardIndex].ai}
+                                    onSaveElaboration={handleSaveElaboration}
+                                />
+                            )}
+                        </div>
                     </div>
-                ))}
+
+                    {/* right side */}
+                    <div className='h-[85%] w-1/2 bg-[#004D7C] border border-white border-2 rounded-md px-4'>
+                        <div className='flex justify-between py-2 text-white'>
+                            <div
+                                className='hover:cursor-pointer'
+                                onClick={() => handleShuffle()}>
+                                {isShuffled ? 
+                                    <ShuffleOnIcon
+                                        sx={{ color: 'white' }}
+                                    /> 
+                                    :
+                                    <ShuffleIcon 
+                                        sx={{ color: 'white' }}
+                                    />
+                                }
+                            </div>
+                        </div>
+                        <div className='h-[90%] overflow-y-scroll pr-3'>
+                            <div className='flex flex-col gap-1'>
+                                {cardsArray.length === 0 && (
+                                    <p className="text-gray-700">No cards found.</p>)}
+                                {cardsArray.map((card, i) => (
+                                    <div
+                                        key={card.id}
+                                        className={`rounded-md flex cursor-pointer ${i === cardIndex ? 'bg-[#88B1CA]' : 'bg-zinc-200'}`}
+                                        onClick={() => {
+                                            setCardIndex(i)
+                                        }}>
+                                        <div className="w-[20%] m-3 aspect-5/3 bg-white rounded-md flex justify-center items-center">
+                                            <p className="text-sm font-medium">{card.front}</p>
+                                        </div>
+                                        <p className="text-sm text-black my-4">{card.back}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     )
