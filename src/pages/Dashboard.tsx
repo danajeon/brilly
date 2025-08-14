@@ -111,7 +111,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className={`h-screen overflow-y-hidden ${cardSetArray.length > 0 ? 'opacity-100' : 'opacity-100'}`}>
+    <div className="h-screen overflow-y-hidden">
       <NavBar />
       <div className="h-full w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
         <div className="min-h-[95%] max-w-[75%]">

@@ -244,7 +244,6 @@ export default function CreateNewSet() {
                   </div>
                 )
               })}
-
               <button
                 onClick={addNewCard}
                 className="w-full border-3 border-[#88B1CA] rounded-lg text-[#88B1CA] text-lg font-semibold p-2 mt-4 mb-4 hover:bg-blue-200 cursor-pointer"
