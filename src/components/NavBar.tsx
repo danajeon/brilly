@@ -1,13 +1,20 @@
-
+import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo.webp'
 
 export const NavBar = () => {
+      const navigate = useNavigate();
+      const handleLogo = () => {
+    navigate('/')
+  }
+
     return (
         <div className="flex flex-row justify-between items-center">
             <div className="flex">
                 <img
-                    className="w-[100px] m-2"
-                    src="public/logo.webp"
+                    className="w-[100px] m-2 cursor-pointer"
+                    src={logo}
                     alt="logo"
+                    onClick={() => handleLogo()}
                 />
             </div>
             <div>

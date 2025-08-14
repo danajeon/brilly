@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import aiImg from "../assets/ai.png"
 
 interface ElaboratorProps {
-    flashcardContent: string;
-    ai: string | null;
-    cardId: string | undefined;
-    onSaveElaboration: (cardId: string, elaborationText: string) => void; // Void indicates function does not return a value
+  flashcardContent: string;
+  ai: string | null;
+  cardId: string | undefined;
+  onSaveElaboration: (cardId: string, elaborationText: string) => void; // Void indicates function does not return a value
 }
 
 
@@ -14,13 +15,13 @@ const Elaborator = ({ flashcardContent, cardId, ai, onSaveElaboration }: Elabora
   const [loading, setLoading] = useState(false);
 
   // Reset elaboration & auto-show existing ai when card changes
-    useEffect(() => {
-        if (ai) {
-            setElaboration(ai);
-        } else {
-            setElaboration(null);
-        }
-    }, [flashcardContent, ai]);
+  useEffect(() => {
+    if (ai) {
+      setElaboration(ai);
+    } else {
+      setElaboration(null);
+    }
+  }, [flashcardContent, ai]);
 
   const handleElaborate = async (text: string) => {
     setLoading(true);
@@ -59,30 +60,32 @@ const Elaborator = ({ flashcardContent, cardId, ai, onSaveElaboration }: Elabora
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto border rounded-lg shadow-md space-y-4">
-      <h2 className="text-xl font-semibold">Elaborate with AI</h2>
-      {/* <input
-        type="text"
-        value={flashcardContent}
-        onChange={(e) => setFlashcardContent(e.target.value)}
-        className="w-full p-2 border rounded"
-      /> */}
-      <button
-        onClick={() => handleElaborate(flashcardContent)}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        disabled={loading}
-      >
-        {loading ? 'Running...' : 'Run'}
-      </button>
-        <div className="mt-4 p-3 border bg-gray-50 rounded">
-          <h3 className="font-medium">Elaboration:</h3>
-            {elaboration && (
-              <p>{elaboration}</p>
-            )}
-            {!elaboration && (
-              <p>No elaboration yet.</p>
-            )}
-        </div>
+    <div className="bg-white rounded-md shadow-md space-y-4 p-2">
+      <div className='flex justify-between items-center'>
+        <h2 className="font-semibold text-[#004D7C] text-md">Learning Assistant</h2>
+        <button
+          onClick={() => handleElaborate(flashcardContent)}
+          className="flex items-center bg-[#88B1CA] text-white text-xs rounded-2xl p-1 px-3 gap-2 hover:bg-zinc-200 hover:text-black"
+          disabled={loading}
+        >
+          {loading ? 'Running...' : 'Need another explanation? Click to regenerate.'}
+          <div className='h-full'>
+            <img
+              src={aiImg}
+              alt="aiImg"
+              className='h-[1.5rem]'
+            />
+          </div>
+        </button>
+      </div>
+      <div className="min-h-[4rem] max-h-[9.5rem] bg-gray-50 rounded mt-4 p-3 overflow-scroll">
+        {elaboration && (
+          <p className='text-sm'>{elaboration}</p>
+        )}
+        {!elaboration && (
+          <p className='text-sm'>No elaboration yet.</p>
+        )}
+      </div>
     </div>
   );
 };

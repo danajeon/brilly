@@ -15,17 +15,22 @@ const supabase = createClient(
 interface Card {
   front: string;
   back: string;
+  _cid?: string; // client-only id for React keys
 }
 
 export default function CreateNewSet() {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
-  const [cards, setCards] = useState<Card[]>([{ front: "", back: "" }]);
+  const [cards, setCards] = useState<Card[]>([{ front: "", back: "", _cid: crypto.randomUUID() }]);
   const [loading, setLoading] = useState(false);
 
+  // Drag state
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
   const addNewCard = () => {
-    setCards([...cards, { front: "", back: "" }]);
+    setCards([...cards, { front: "", back: "", _cid: crypto.randomUUID() }]);
   };
 
   const handleCardChange = (index: number, field: "front" | "back", value: string) => {
@@ -39,6 +44,11 @@ export default function CreateNewSet() {
     // ! turns "" into true so if statement can run
     if (!title.trim()) {
       alert("Please enter a title for your set.");
+      return;
+    }
+
+    if (cards.some((card) => !card.front.trim() || !card.back.trim())) {
+      alert("One or more blank cards. Please fill out or delete.");
       return;
     }
     setLoading(true);
@@ -87,7 +97,7 @@ export default function CreateNewSet() {
 
       // Resets title, front & back to blank
       setTitle("");
-      setCards([{ front: "", back: "" }]);
+      setCards([{ front: "", back: "", _cid: crypto.randomUUID() }]);
     }
 
     // Catches error when they are thrown from try
@@ -121,71 +131,132 @@ export default function CreateNewSet() {
     setCards(newCards);
   };
 
+  // Drag handlers
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDragIndex(index);
+    e.dataTransfer.setData("text/plain", String(index));
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragEnter = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    const from = dragIndex;
+    const to = index;
+    if (from === null || to === null) {
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+    if (from === to) {
+      setDragIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    setCards(prev => {
+      const newCards = [...prev];
+      const [moved] = newCards.splice(from, 1);
+      newCards.splice(to, 0, moved);
+      return newCards;
+    });
+
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
   return (
     <div className="h-screen overflow-y-hidden">
       <NavBar />
-      <div className="h-full w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
-        <div className="min-h-[95%] min-w-[75%]">
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
+        <div className="h-[95%] min-w-[75%]">
           <div className="flex flex-row justify-start">
             <h1 className="text-3xl text-[#004D7C] font-semibold mb-4">Create New Set</h1>
           </div>
-          <div className="h-[75%] w-full bg-white rounded-lg shadow-xl p-6 overflow-scroll">
-            <div className="mb-4">
+          <div className="h-[70%] w-full bg-white rounded-lg shadow-xl p-6">
+            <div className="mb-2">
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full bg-zinc-200 rounded-lg p-2"
               />
-              <span className="text-xl font-semibold text-[#004D7C]">Title</span>
+              <span className="text-lg font-semibold text-[#004D7C]">Title</span>
             </div>
+            <div className="h-[80%] px-4 overflow-scroll">
+              {cards.map((card, index) => {
+                const isDragging = index === dragIndex;
+                const isDragOver = index === dragOverIndex;
+                return (
+                  <div
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragEnter={(e) => handleDragEnter(e, index)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, index)}
+                    onDragEnd={handleDragEnd}
+                    className={`flex items-center justify-between w-full transition-shadow rounded-lg ${isDragOver ? "border-3 border-dashed" : ""
+                      } ${isDragging ? "opacity-60" : "opacity-100"}`}>
+                    <div key={index} className="flex flex-1 bg-[#88B1CA] rounded-lg shadow-md my-1">
+                      <p className="flex w-[3%] justify-center items-center text-lg font-semibold text-[#004D7C] ml-3">{index + 1}</p>
+                      <div className="flex justify-between w-[95%] gap-3 m-2">
+                        <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
+                          <textarea
 
-            {cards.map((card, index) => (
-              <div className="flex justify-between flex-row w-full">
-                <div key={index} className="flex flex-1 bg-[#88B1CA] rounded-lg shadow-md my-4">
-                  <p className="flex w-[5%] justify-center items-center text-2xl font-semibold text-[#004D7C] ml-3">{index + 1}</p>
-                  <div className="flex justify-between w-[95%] gap-3 m-3">
-                    <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
-                      <input
-                        type="text"
-                        value={card.front}
-                        onChange={(e) => handleCardChange(index, "front", e.target.value)}
-                        className=" w-full bg-zinc-200 rounded p-2"
-                      />
-                      <span className="text-sm font-semibold">Front</span>
+                            value={card.front}
+                            onChange={(e) => handleCardChange(index, "front", e.target.value)}
+                            className="w-full bg-zinc-200 rounded p-1 text-sm max-h-[200px] resize-none"
+                          />
+                          <span className="text-sm font-semibold">Front</span>
+                        </div>
+                        <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
+                          <textarea
+
+                            value={card.back}
+                            onChange={(e) => handleCardChange(index, "back", e.target.value)}
+                            className=" w-full bg-zinc-200 rounded p-1 text-sm max-h-[200px] resize-none"
+                          />
+                          <span className="text-sm font-semibold">Back</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
-                      <input
-                        type="text"
-                        value={card.back}
-                        onChange={(e) => handleCardChange(index, "back", e.target.value)}
-                        className=" w-full bg-zinc-200 rounded p-2"
-                      />
-                      <span className="text-sm font-semibold">Back</span>
-                    </div>
+                    <button
+                      onClick={() => deleteCard(index)}
+                      className="cursor-pointer z-1">
+                      <DeleteForeverIcon
+                        fontSize="large"
+                        className="hover:text-red-500 " />
+                    </button>
                   </div>
-                </div>
-                <button
-                  onClick={() => deleteCard(index)}
-                  className="cursor-pointer z-1">
-                  <DeleteForeverIcon
-                    fontSize="large"
-                    className="hover:text-red-500 " />
-                </button>
-              </div>
-            ))}
+                )
+              })}
 
-            <button
-              onClick={addNewCard}
-              className="w-full border-3 border-[#88B1CA] rounded-lg text-[#88B1CA] text-xl font-semibold p-2 mb-4 hover:bg-blue-200 cursor-pointer"
-            >
-              Add New +
-            </button>
+              <button
+                onClick={addNewCard}
+                className="w-full border-3 border-[#88B1CA] rounded-lg text-[#88B1CA] text-lg font-semibold p-2 mt-4 mb-4 hover:bg-blue-200 cursor-pointer"
+              >
+                Add New +
+              </button>
+            </div>
           </div>
           <button
             onClick={handleCreate}
             disabled={loading}
-            className="w-full bg-[#004D7C] text-white text-lg font-semibold rounded-lg shadow-xl mt-4 mb-8 p-2 hover:bg-white hover:text-[#004D7C] border-[#004D7C] disabled:opacity-50 cursor-pointer"
+            className="w-full bg-[#004D7C] text-white text-lg font-semibold rounded-lg shadow-xl mt-4 mb-8 p-3 hover:bg-white hover:text-[#004D7C] border-[#004D7C] disabled:opacity-50 cursor-pointer"
           >
             {loading ? "Creating..." : "Create"}
           </button>
