@@ -4,8 +4,6 @@ import { createClient } from '@supabase/supabase-js';
 import cardsImg from "../assets/cards.webp"
 import createImg from "../assets/createnew.webp"
 
-import { NavBar } from '../components/NavBar';
-
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 // Info needed to connect to Supabase
@@ -23,7 +21,8 @@ interface CardSet {
   quantity: number;
 }
 
-export default function Dashboard() {
+export default function Dashboard({ isDemo }: { isDemo: boolean }) {
+
   const [cardSetArray, setCardSetArray] = useState<CardSet[]>([]);
   const [hoveredCardSet, setHoveredCardSet] = useState<CardSet | null>(null)
 
@@ -36,20 +35,36 @@ export default function Dashboard() {
   // Pulls up cardSets as soon as page renders
   // Runs only once because dependency is empty
   useEffect(() => {
-    async function fetchCardSets() {
-      try {
-        const { data, error } = await supabase.from('cardSets').select("*");
-        if (error) throw error;
-        if (data) setCardSetArray(data);
+    if (isDemo) {
+      // --- DEMO MODE: Load from localStorage instead of Supabase ---
+      const localSets = localStorage.getItem("cardSets");
+
+      if (localSets) {
+        try {
+          setCardSetArray(JSON.parse(localSets));
+        } catch (err) {
+          console.error("Error parsing localStorage cardSets:", err);
+          setCardSetArray([]);
+        }
+      } else {
+        setCardSetArray([]); // no sets yet in localStorage
+      }
+    } else {
+      async function fetchCardSets() {
+        try {
+          const { data, error } = await supabase.from('cardSets').select("*");
+          if (error) throw error;
+          if (data) setCardSetArray(data);
+        }
+
+        catch (error) {
+          console.error(error);
+          alert('Error fetching card sets.');
+        }
       }
 
-      catch (error) {
-        console.error(error);
-        alert('Error fetching card sets.');
-      }
+      fetchCardSets();
     }
-
-    fetchCardSets();
   }, []);
 
   const handleCardSetClick = (cardSetId: string) => {
@@ -57,7 +72,7 @@ export default function Dashboard() {
   }
 
   const handleCreateNewSet = () => {
-    navigate('/createnewset')
+      navigate('/createnewset')
   }
 
   const handleSetDelete = async (cardSet: CardSet) => {
@@ -112,40 +127,48 @@ export default function Dashboard() {
 
   return (
     <div className="h-screen overflow-y-hidden">
-      <NavBar />
+      
       <div className="h-full w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
         <div className="min-h-[95%] max-w-[75%]">
           <h1 className="text-3xl font-semibold text-white mb-4">Welcome, </h1>
           <span className='text-3xl font-semibold text-[#004D7C]'>{ }</span>
           <div className='h-[75%] w-full flex flex-row justify-between gap-3'>
-            <div className="h-full w-[80%] bg-white rounded-lg shadow-xl px-6 py-2 overflow-scroll flex flex-col items-end">
-              <div
-                className='w-[10%] relative border text-xs p-1 hover:bg-grey-200'
-                onClick={() => setSortOpen(!sortOpen)}>
+            <div className="h-full w-[80%] bg-white rounded-lg shadow-xl px-6 py-2 overflow-y-scroll flex flex-col items-end">
+              <button
+                className="relative w-[120px] border bg-gray-100 hover:bg-gray-200 text-xs px-3 py-2 text-left shadow-sm rounded-sm"
+                onClick={() => setSortOpen(!sortOpen)}
+              >
                 Sort by:
-                <div className={`w-inherit absolute top-6 p-1 ${sortOpen ? "block" : "hidden"} border`}>
-                  <div 
-                    className='hover:bg-grey-200'
-                    onClick={() => handleCardSetSortByDateDesc()}>
+                {/* Dropdown Menu */}
+                {sortOpen && (
+                  <div className="absolute left-0 mt-3 w-full bg-white border shadow-lg z-50 rounded-sm">
+                    <div
+                      className="px-3 py-2 hover:bg-[#88B1CA] cursor-pointer"
+                      onClick={() => handleCardSetSortByDateDesc()}
+                    >
                       Date Newest
-                  </div>
-                  <div 
-                    className='hover:bg-grey-200'
-                    onClick={() => handleCardSetSortByDateAsc()}>
+                    </div>
+                    <div
+                      className="px-3 py-2 hover:bg-[#88B1CA] cursor-pointer"
+                      onClick={() => handleCardSetSortByDateAsc()}
+                    >
                       Date Oldest
-                  </div>
-                  <div 
-                    className='hover:bg-grey-200'
-                    onClick={() => handleCardSetSortAZ()}>
+                    </div>
+                    <div
+                      className="px-3 py-2 hover:bg-[#88B1CA] cursor-pointer"
+                      onClick={() => handleCardSetSortAZ()}
+                    >
                       Title Ascending
-                  </div>
-                  <div
-                    className='hover:bg-grey-200'
-                    onClick={() => handleCardSetSortZA()}>
+                    </div>
+                    <div
+                      className="px-3 py-2 hover:bg-[#88B1CA] cursor-pointer"
+                      onClick={() => handleCardSetSortZA()}
+                    >
                       Title Descending
+                    </div>
                   </div>
-                </div>
-              </div>
+                )}
+              </button>
               <div className='w-full grid grid-cols-4 gap-4'>
                 <div className='flex flex-col items-center justify-between bg-white border-3 border-transparent hover:border-[#88B1CA] rounded-md p-4 aspect-1/1 cursor-pointer'>
                   <div

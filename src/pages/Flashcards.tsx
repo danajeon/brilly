@@ -3,7 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 import { useParams } from 'react-router-dom';
 
 import Elaborator from '../components/Elaborator';
-import { NavBar } from '../components/NavBar';
 
 import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
 import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
@@ -26,7 +25,7 @@ interface Card {
     index: number
 }
 
-export default function Flashcards() {
+export default function Flashcards({ isDemo }: { isDemo: boolean }) {
     const params = useParams<{ postId: string }>();
     const cardSetId = params.postId
     const [cardsArray, setCardsArray] = useState<Card[]>([])
@@ -46,47 +45,66 @@ export default function Flashcards() {
     }
 
     useEffect(() => {
-        // Fetches cardSet by ID
-        async function fetchCardSet() {
-            try {
-                const { data, error } =
-                    await supabase
-                        .from("cardSets")
-                        .select("*")
-                        .eq("id", cardSetId).single();
-                if (error) throw error;
-                if (data) setTitle(data.title);
-            }
+        if (isDemo) {
+            // DEMO MODE: fetch from localStorage
+            const storedSets = JSON.parse(localStorage.getItem('cardSets') || '[]');
+            const foundSet = storedSets.find((s: any) => s.id === cardSetId);
 
-            catch (error) {
-                console.error(error);
-                alert('Error fetching card sets.');
+            if (foundSet) {
+                setTitle(foundSet.title);
+
+                // cards for this set
+                const storedCards = JSON.parse(localStorage.getItem('cards') || '[]');
+                const demoCards = storedCards
+                    .filter((c: any) => c.cardSet === cardSetId)
+                    .sort((a: any, b: any) => a.index - b.index);
+
+                setCardsArray(demoCards);
+                setOriginalCardsArray(demoCards);
             }
+        } else {
+            // Fetches cardSet by ID
+            async function fetchCardSet() {
+                try {
+                    const { data, error } =
+                        await supabase
+                            .from("cardSets")
+                            .select("*")
+                            .eq("id", cardSetId).single();
+                    if (error) throw error;
+                    if (data) setTitle(data.title);
+                }
+
+                catch (error) {
+                    console.error(error);
+                    alert('Error fetching card sets.');
+                }
+            }
+            fetchCardSet()
+
+            // Fetches all cards in given cardSet
+            async function fetchCards() {
+                try {
+                    const { data, error } =
+                        await supabase
+                            .from("cards")
+                            .select("*")
+                            .eq("cardSet", cardSetId)
+                            .order("index", { ascending: true });
+                    if (error) throw error;
+                    if (data) {
+                        setCardsArray(data)
+                        setOriginalCardsArray(data)
+                    };
+                }
+
+                catch (error) {
+                    console.error(error);
+                    alert('Error fetching cards.');
+                }
+            }
+            fetchCards()
         }
-        fetchCardSet()
-
-        // Fetches all cards in given cardSet
-        async function fetchCards() {
-            try {
-                const { data, error } =
-                    await supabase
-                        .from("cards")
-                        .select("*")
-                        .eq("cardSet", cardSetId)
-                        .order("index", { ascending: true });
-                if (error) throw error;
-                if (data) {
-                    setCardsArray(data)
-                    setOriginalCardsArray(data)
-                };
-            }
-
-            catch (error) {
-                console.error(error);
-                alert('Error fetching cards.');
-            }
-        }
-        fetchCards()
     }, []);
 
     // Updates front and back of first card when cardsArray is populated
@@ -128,23 +146,36 @@ export default function Flashcards() {
     }
 
     const handleSaveElaboration = async (cardId: string, elaborationText: string) => {
-        await supabase
-            .from('cards')
-            .update({ ai: elaborationText })
-            .eq('id', cardId)
-            .then(({ error }) => {
-                if (error) {
-                    console.error('Error saving elaboration to Supabase:', error);
-                }
-                else {
-                    // Update local state to reflect new elaboration without refresh
-                    setCardsArray(prev =>
-                        prev.map(card =>
-                            card.id === cardId ? { ...card, ai: elaborationText } : card
-                        )
-                    );
-                }
-            });
+        if (isDemo) {
+            // DEMO MODE: update localStorage
+            const storedCards = JSON.parse(localStorage.getItem('cards') || '[]');
+            const updated = storedCards.map((card: any) =>
+                card.id === cardId ? { ...card, ai: elaborationText } : card
+            );
+            localStorage.setItem('cards', JSON.stringify(updated));
+
+            setCardsArray((prev) =>
+                prev.map((card) => (card.id === cardId ? { ...card, ai: elaborationText } : card))
+            );
+        } else {
+            await supabase
+                .from('cards')
+                .update({ ai: elaborationText })
+                .eq('id', cardId)
+                .then(({ error }) => {
+                    if (error) {
+                        console.error('Error saving elaboration to Supabase:', error);
+                    }
+                    else {
+                        // Update local state to reflect new elaboration without refresh
+                        setCardsArray(prev =>
+                            prev.map(card =>
+                                card.id === cardId ? { ...card, ai: elaborationText } : card
+                            )
+                        );
+                    }
+                });
+        }
     };
 
     // 
@@ -166,7 +197,7 @@ export default function Flashcards() {
 
     return (
         <div className={`h-screen overflow-y-hidden ${cardsArray.length > 0 ? 'opacity-100' : 'opacity-0'}`}>
-            <NavBar />
+
             <div className="h-[95%] w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
                 <div className="flex flex-row h-full w-[70%] gap-8 mt-8">
                     {/* left side */}
@@ -178,14 +209,14 @@ export default function Flashcards() {
                                 {showFront ?
                                     // CARD FRONT
                                     <div
-                                        className="w-full h-full flex justify-center items-center text-4xl "
+                                        className="w-full h-full flex justify-center items-center text-center text-4xl p-4"
                                         onClick={() => setShowFront(false)}>
                                         <span>{front}</span>
                                     </div>
                                     :
                                     // CARD BACK
                                     <div
-                                        className="w-full h-full flex justify-center items-center text-2xl "
+                                        className="w-full h-full flex justify-center items-center text-center text-2xl p-4"
                                         onClick={() => setShowFront(true)}>
                                         <span>{back}</span>
                                     </div>
@@ -227,12 +258,12 @@ export default function Flashcards() {
                             <div
                                 className='hover:cursor-pointer'
                                 onClick={() => handleShuffle()}>
-                                {isShuffled ? 
+                                {isShuffled ?
                                     <ShuffleOnIcon
                                         sx={{ color: 'white' }}
-                                    /> 
+                                    />
                                     :
-                                    <ShuffleIcon 
+                                    <ShuffleIcon
                                         sx={{ color: 'white' }}
                                     />
                                 }
@@ -245,14 +276,14 @@ export default function Flashcards() {
                                 {cardsArray.map((card, i) => (
                                     <div
                                         key={card.id}
-                                        className={`rounded-md flex cursor-pointer ${i === cardIndex ? 'bg-[#88B1CA]' : 'bg-zinc-200'}`}
+                                        className={`rounded-md flex p-3 gap-2 cursor-pointer ${i === cardIndex ? 'bg-[#88B1CA]' : 'bg-zinc-200'}`}
                                         onClick={() => {
                                             setCardIndex(i)
                                         }}>
-                                        <div className="w-[20%] m-3 aspect-5/3 bg-white rounded-md flex justify-center items-center">
-                                            <p className="text-sm font-medium">{card.front}</p>
+                                        <div className="min-w-[25%]  aspect-5/3 bg-white rounded-md flex justify-center items-center">
+                                            <p className="m-3 text-sm font-medium text-center">{card.front}</p>
                                         </div>
-                                        <p className="text-sm text-black my-4">{card.back}</p>
+                                        <p className="text-sm text-black my-4 line-clamp-2">{card.back}</p>
                                     </div>
                                 ))}
                             </div>

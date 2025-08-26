@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
 
-import { NavBar } from "../components/NavBar";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 // Info needed to connect to Supabase
@@ -18,7 +17,7 @@ interface Card {
   _cid?: string; // client-only id for React keys
 }
 
-export default function CreateNewSet() {
+export default function CreateNewSet({ isDemo }: { isDemo: boolean }) {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -54,71 +53,197 @@ export default function CreateNewSet() {
     setLoading(true);
 
     // Explicit declaration of current type vs anticipated type
-    let createdCardSetId: string | null = null
+    let createdCardSetId: string | null = null;
 
     try {
-      // Initiates user auth before creating sets
+      if (isDemo) {
+        // DEMO MODE — store in localStorage instead of Supabase
 
-      // const user = await supabase.auth.getUser();
-      // const userId = user.data.user?.id;
-      // if (!userId) {
-      //   alert("You must be logged in to create a set.");
-      //   setLoading(false);
-      //   return;
-      // }
+        // Assigns unique ID for card set
+        createdCardSetId = `cdst${crypto.randomUUID()}`;
 
-      // Assigns unique ID for card set
-      // Creates cardSet row within database
-      const { data: cardSetData, error: cardSetError } = await supabase
-        .from("cardSets")
-        .insert([{ title, id: `cdst${crypto.randomUUID()}`, quantity: cards.length }])
-        .select()
-        .single();
+        const cardSetData = {
+          id: createdCardSetId,
+          title,
+          quantity: cards.length,
+          created: new Date().toISOString(),
+        };
 
-      // Stores createdCardSetId into temp variable
-      createdCardSetId = cardSetData.id;
-      if (cardSetError) throw cardSetError;
+        // Save card set into localStorage
+        const existingSets = JSON.parse(localStorage.getItem("cardSets") || "[]");
+        localStorage.setItem("cardSets", JSON.stringify([...existingSets, cardSetData]));
 
-      // Assigns ID, front & back, cardSet ID for every card
-      const { error: cardsError } = await supabase.from("cards").insert(
-        cards.map((card, i) => ({
+        // Assigns ID, front & back, cardSet ID for every card
+        const newCards = cards.map((card, i) => ({
           id: `cd${crypto.randomUUID()}`,
           front: card.front,
           back: card.back,
-          cardSet: cardSetData.id,
+          cardSet: createdCardSetId,
           ai: null,
           index: i,
-        }))
-      );
+        }));
 
-      if (cardsError) throw cardsError;
+        const existingCards = JSON.parse(localStorage.getItem("cards") || "[]");
+        localStorage.setItem("cards", JSON.stringify([...existingCards, ...newCards]));
 
-      alert("Flashcard set created successfully!");
+        alert("Flashcard set created successfully!");
 
-      // Resets title, front & back to blank
-      setTitle("");
-      setCards([{ front: "", back: "", _cid: crypto.randomUUID() }]);
+        // Resets title, front & back to blank
+        setTitle("");
+        setCards([{ front: "", back: "", _cid: crypto.randomUUID() }]);
+
+        setLoading(false);
+        navigate("/dashboard");
+      }
+
+      else {
+        // NORMAL MODE — Supabase storage
+
+        // Initiates user auth before creating sets
+
+        // const user = await supabase.auth.getUser();
+        // const userId = user.data.user?.id;
+        // if (!userId) {
+        //   alert("You must be logged in to create a set.");
+        //   setLoading(false);
+        //   return;
+        // }
+
+        // Assigns unique ID for card set
+        // Creates cardSet row within database
+        const { data: cardSetData, error: cardSetError } = await supabase
+          .from("cardSets")
+          .insert([{ title, id: `cdst${crypto.randomUUID()}`, quantity: cards.length }])
+          .select()
+          .single();
+
+        // Stores createdCardSetId into temp variable
+        createdCardSetId = cardSetData.id;
+        if (cardSetError) throw cardSetError;
+
+        // Assigns ID, front & back, cardSet ID for every card
+        const { error: cardsError } = await supabase.from("cards").insert(
+          cards.map((card, i) => ({
+            id: `cd${crypto.randomUUID()}`,
+            front: card.front,
+            back: card.back,
+            cardSet: cardSetData.id,
+            ai: null,
+            index: i,
+          }))
+        );
+
+        if (cardsError) throw cardsError;
+
+        alert("Flashcard set created successfully!");
+
+        // Resets title, front & back to blank
+        setTitle("");
+        setCards([{ front: "", back: "", _cid: crypto.randomUUID() }]);
+
+        setLoading(false);
+        navigate("/dashboard");
+      }
     }
 
     // Catches error when they are thrown from try
     catch (error) {
       console.error(error);
 
-      // Pulls ID of cardSet that triggers error
-      if (createdCardSetId) {
-        // Delete cards with that cardSet id
-        await supabase.from("cards").delete().eq("cardSet", createdCardSetId);
-        // Delete cardSet
-        await supabase.from("cardSets").delete().eq("id", createdCardSetId);
+      if (!isDemo) {
+        // Pulls ID of cardSet that triggers error
+        if (createdCardSetId) {
+          // Delete cards with that cardSet id
+          await supabase.from("cards").delete().eq("cardSet", createdCardSetId);
+          // Delete cardSet
+          await supabase.from("cardSets").delete().eq("id", createdCardSetId);
+        }
       }
+
       alert("Error creating flashcard set.");
     }
-
-    finally {
-      setLoading(false);
-      navigate('/')
-    }
   };
+
+  // const handleCreate = async () => {
+  //   // trim() removes whitespace from both ends
+  //   // ! turns "" into true so if statement can run
+  //   if (!title.trim()) {
+  //     alert("Please enter a title for your set.");
+  //     return;
+  //   }
+
+  //   if (cards.some((card) => !card.front.trim() || !card.back.trim())) {
+  //     alert("One or more blank cards. Please fill out or delete.");
+  //     return;
+  //   }
+  //   setLoading(true);
+
+  //   // Explicit declaration of current type vs anticipated type
+  //   let createdCardSetId: string | null = null
+
+  //   try {
+  //     // Initiates user auth before creating sets
+
+  //     // const user = await supabase.auth.getUser();
+  //     // const userId = user.data.user?.id;
+  //     // if (!userId) {
+  //     //   alert("You must be logged in to create a set.");
+  //     //   setLoading(false);
+  //     //   return;
+  //     // }
+
+  //     // Assigns unique ID for card set
+  //     // Creates cardSet row within database
+  //     const { data: cardSetData, error: cardSetError } = await supabase
+  //       .from("cardSets")
+  //       .insert([{ title, id: `cdst${crypto.randomUUID()}`, quantity: cards.length }])
+  //       .select()
+  //       .single();
+
+  //     // Stores createdCardSetId into temp variable
+  //     createdCardSetId = cardSetData.id;
+  //     if (cardSetError) throw cardSetError;
+
+  //     // Assigns ID, front & back, cardSet ID for every card
+  //     const { error: cardsError } = await supabase.from("cards").insert(
+  //       cards.map((card, i) => ({
+  //         id: `cd${crypto.randomUUID()}`,
+  //         front: card.front,
+  //         back: card.back,
+  //         cardSet: cardSetData.id,
+  //         ai: null,
+  //         index: i,
+  //       }))
+  //     );
+
+  //     if (cardsError) throw cardsError;
+
+  //     alert("Flashcard set created successfully!");
+
+  //     // Resets title, front & back to blank
+  //     setTitle("");
+  //     setCards([{ front: "", back: "", _cid: crypto.randomUUID() }]);
+  //   }
+
+  //   // Catches error when they are thrown from try
+  //   catch (error) {
+  //     console.error(error);
+
+  //     // Pulls ID of cardSet that triggers error
+  //     if (createdCardSetId) {
+  //       // Delete cards with that cardSet id
+  //       await supabase.from("cards").delete().eq("cardSet", createdCardSetId);
+  //       // Delete cardSet
+  //       await supabase.from("cardSets").delete().eq("id", createdCardSetId);
+  //     }
+  //     alert("Error creating flashcard set.");
+  //   }
+
+  //   finally {
+  //     setLoading(false);
+  //     navigate('/')
+  //   }
+  // };
 
   // Delete cards
   const deleteCard = (index: number) => {
@@ -181,7 +306,6 @@ export default function CreateNewSet() {
 
   return (
     <div className="h-screen overflow-y-hidden">
-      <NavBar />
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
         <div className="h-[95%] min-w-[75%]">
           <div className="flex flex-row justify-start">
@@ -204,6 +328,7 @@ export default function CreateNewSet() {
                 return (
                   <div
                     draggable
+                    key={index}
                     onDragStart={(e) => handleDragStart(e, index)}
                     onDragEnter={(e) => handleDragEnter(e, index)}
                     onDragOver={handleDragOver}
@@ -211,7 +336,7 @@ export default function CreateNewSet() {
                     onDragEnd={handleDragEnd}
                     className={`flex items-center justify-between w-full transition-shadow rounded-lg ${isDragOver ? "border-3 border-dashed" : ""
                       } ${isDragging ? "opacity-60" : "opacity-100"}`}>
-                    <div key={index} className="flex flex-1 bg-[#88B1CA] rounded-lg shadow-md my-1">
+                    <div className="flex flex-1 bg-[#88B1CA] rounded-lg shadow-md my-1">
                       <p className="flex w-[3%] justify-center items-center text-lg font-semibold text-[#004D7C] ml-3">{index + 1}</p>
                       <div className="flex justify-between w-[95%] gap-3 m-2">
                         <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
