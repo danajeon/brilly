@@ -1,15 +1,24 @@
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.webp'
 import { useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
 type Props = {
     isDemo: boolean
     setIsDemo: (value: boolean) => void
+    user: any
+    setUser: (user: any) => void
 }
 
-export const NavBar = ({ isDemo, setIsDemo }: Props) => {
+// Info needed to connect to Supabase
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+
+export const NavBar = ({ isDemo, setIsDemo, user, setUser }: Props) => {
     const navigate = useNavigate();
-    
+
     const handleLogo = () => {
         navigate('/')
     }
@@ -18,6 +27,20 @@ export const NavBar = ({ isDemo, setIsDemo }: Props) => {
         setIsDemo(false)
         navigate('/')
     }
+
+    const handleAuth = () => {
+        navigate('/auth')
+    }
+
+    const handlesmolpp = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+        console.error("Logout error:", error.message);
+    } else {
+        setUser(null); // update App state
+        navigate('/'); // redirect to home
+    }
+};
 
     return (
         <div className="flex flex-row bg-white justify-between items-center sticky top-0">
@@ -37,11 +60,24 @@ export const NavBar = ({ isDemo, setIsDemo }: Props) => {
                     >Exit Demo Mode
                     </button>
                 }
-                <ul className="flex text-[#004D7C] font-semibold items-center">
-                    <li className="mx-1">Log In</li>
-                    <span className="mx-1"> | </span>
-                    <li className="ml-1 mr-2">Sign Up</li>
-                </ul>
+                {!user &&
+                    <li 
+                        className="flex text-[#004D7C] mx-2 font-semibold items-center hover:cursor-pointer hover:underline"
+                        onClick={() => handleAuth()}>
+                            Log In | Sign Up
+                    </li>
+                }
+                {user &&
+                    <ul className="flex gap-1 mx-2 text-[#004D7C] font-semibold items-center">
+                        <li className="">{user.email}</li>
+                        <span className=""> | </span>
+                        <li 
+                            className="hover:cursor-pointer hover:underline"
+                            onClick={() => handlesmolpp()}>
+                                    Log Out
+                        </li>
+                    </ul>
+                }
             </div>
         </div>
     )

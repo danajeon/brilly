@@ -21,7 +21,12 @@ interface CardSet {
   quantity: number;
 }
 
-export default function Dashboard({ isDemo }: { isDemo: boolean }) {
+type Props = {
+  isDemo: boolean;
+  user: any
+};
+
+export default function Dashboard({ isDemo, user }: Props) {
 
   const [cardSetArray, setCardSetArray] = useState<CardSet[]>([]);
   const [hoveredCardSet, setHoveredCardSet] = useState<CardSet | null>(null)
@@ -32,8 +37,17 @@ export default function Dashboard({ isDemo }: { isDemo: boolean }) {
 
   const navigate = useNavigate();
 
-  // Pulls up cardSets as soon as page renders
-  // Runs only once because dependency is empty
+  const at = user ? user.email.indexOf("@") : null
+  const trimmed = user ? user.email.slice(0,at) : null
+
+  // Forces user to Landing Page if not demo or not signed in
+  useEffect(() => {
+    if(!isDemo && !user) {
+      navigate("/")
+    }
+  }, [])
+
+  // Pulls up cardSets when page renders or when user/isDemo changes
   useEffect(() => {
     if (isDemo) {
       // --- DEMO MODE: Load from localStorage instead of Supabase ---
@@ -50,9 +64,21 @@ export default function Dashboard({ isDemo }: { isDemo: boolean }) {
         setCardSetArray([]); // no sets yet in localStorage
       }
     } else {
+      // If not logged in yet, clear list and wait
+      if (!user) {
+        setCardSetArray([]);
+        return;
+      }
+
       async function fetchCardSets() {
         try {
-          const { data, error } = await supabase.from('cardSets').select("*");
+          // Filter cardSets by the logged-in user's id.
+          // If your cardSets.user column stores email instead, use .eq('user', user.email)
+          const { data, error } = await supabase
+            .from('cardSets')
+            .select('*')
+            .eq('user', user.id);
+
           if (error) throw error;
           if (data) setCardSetArray(data);
         }
@@ -65,7 +91,7 @@ export default function Dashboard({ isDemo }: { isDemo: boolean }) {
 
       fetchCardSets();
     }
-  }, []);
+  }, [isDemo, user]);
 
   const handleCardSetClick = (cardSetId: string) => {
     navigate(`/flashcards/${cardSetId}`)
@@ -76,22 +102,37 @@ export default function Dashboard({ isDemo }: { isDemo: boolean }) {
   }
 
   const handleSetDelete = async (cardSet: CardSet) => {
-    if (confirm(`Are you sure you want to delete ${cardSet.title}?`)) {
-      try {
-        // Delete cards with that cardSet id
-        await supabase.from("cards").delete().eq("cardSet", cardSet.id);
-        // Delete cardSet
-        await supabase.from("cardSets").delete().eq("id", cardSet.id);
+    if (!confirm(`Are you sure you want to delete ${cardSet.title}?`)) return;
 
-        const { data, error } = await supabase.from('cardSets').select("*");
+    try {
+      if (!isDemo) {
+        // Delete cards with that cardSet id
+        const { error: delCardsErr } = await supabase.from("cards").delete().eq("cardSet", cardSet.id);
+        if (delCardsErr) throw delCardsErr;
+
+        // Delete cardSet
+        const { error: delSetErr } = await supabase.from("cardSets").delete().eq("id", cardSet.id);
+        if (delSetErr) throw delSetErr;
+
+        // refresh list
+        const { data, error } = await supabase.from('cardSets').select("*").eq('user', user!.id);
         if (error) throw error;
         if (data) setCardSetArray(data);
-
+      } else {
+        // demo mode: delete from localStorage
+        const localSets = localStorage.getItem("cardSets");
+        if (localSets) {
+          const parsed: CardSet[] = JSON.parse(localSets);
+          const updated = parsed.filter((s) => s.id !== cardSet.id);
+          localStorage.setItem("cardSets", JSON.stringify(updated));
+          setCardSetArray(updated);
+        }
       }
+    }
 
-      catch (error) {
-        alert("Error deleting card set. Please try again")
-      }
+    catch (error) {
+      console.error(error);
+      alert("Error deleting card set. Please try again")
     }
   }
 
@@ -130,7 +171,7 @@ export default function Dashboard({ isDemo }: { isDemo: boolean }) {
       
       <div className="h-full w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
         <div className="min-h-[95%] max-w-[75%]">
-          <h1 className="text-3xl font-semibold text-white mb-4">Welcome, </h1>
+          <h1 className="text-3xl font-semibold text-white mb-4">Welcome{user ? `, ${trimmed}` : ''}</h1>
           <span className='text-3xl font-semibold text-[#004D7C]'>{ }</span>
           <div className='h-[75%] w-full flex flex-row justify-between gap-3'>
             <div className="h-full w-[80%] bg-white rounded-lg shadow-xl px-6 py-2 overflow-y-scroll flex flex-col items-end">

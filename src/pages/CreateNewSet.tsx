@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createClient } from "@supabase/supabase-js";
 
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DensityMediumIcon from '@mui/icons-material/DensityMedium';
 
 // Info needed to connect to Supabase
 const supabase = createClient(
@@ -17,7 +18,12 @@ interface Card {
   _cid?: string; // client-only id for React keys
 }
 
-export default function CreateNewSet({ isDemo }: { isDemo: boolean }) {
+type Props = {
+  isDemo: boolean;
+  user: any
+};
+
+export default function CreateNewSet({ isDemo, user }: Props) {
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -99,21 +105,11 @@ export default function CreateNewSet({ isDemo }: { isDemo: boolean }) {
       else {
         // NORMAL MODE — Supabase storage
 
-        // Initiates user auth before creating sets
-
-        // const user = await supabase.auth.getUser();
-        // const userId = user.data.user?.id;
-        // if (!userId) {
-        //   alert("You must be logged in to create a set.");
-        //   setLoading(false);
-        //   return;
-        // }
-
         // Assigns unique ID for card set
         // Creates cardSet row within database
         const { data: cardSetData, error: cardSetError } = await supabase
           .from("cardSets")
-          .insert([{ title, id: `cdst${crypto.randomUUID()}`, quantity: cards.length }])
+          .insert([{ title, id: `cdst${crypto.randomUUID()}`, quantity: cards.length, user: user.id }])
           .select()
           .single();
 
@@ -327,18 +323,23 @@ export default function CreateNewSet({ isDemo }: { isDemo: boolean }) {
                 const isDragOver = index === dragOverIndex;
                 return (
                   <div
-                    draggable
                     key={index}
-                    onDragStart={(e) => handleDragStart(e, index)}
-                    onDragEnter={(e) => handleDragEnter(e, index)}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, index)}
-                    onDragEnd={handleDragEnd}
-                    className={`flex items-center justify-between w-full transition-shadow rounded-lg ${isDragOver ? "border-3 border-dashed" : ""
+                    className={`flex items-center justify-between w-full transition-shadow ${isDragOver ? "border-t-2" : ""
                       } ${isDragging ? "opacity-60" : "opacity-100"}`}>
-                    <div className="flex flex-1 bg-[#88B1CA] rounded-lg shadow-md my-1">
-                      <p className="flex w-[3%] justify-center items-center text-lg font-semibold text-[#004D7C] ml-3">{index + 1}</p>
-                      <div className="flex justify-between w-[95%] gap-3 m-2">
+                    <p className="flex w-[3%] justify-start items-center text-lg font-semibold text-[#004D7C]">{index + 1}</p>
+                    <div className="flex items-center flex-1 bg-[#88B1CA] rounded-lg shadow-md my-1">
+                      <div 
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragEnter={(e) => handleDragEnter(e, index)}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, index)}
+                        onDragEnd={handleDragEnd}
+                        className="text-sm h-full flex items-center text-zinc-300 p-1">
+                          <DensityMediumIcon className="hover:cursor-pointer"/>
+                        </div>
+                      
+                      <div className="flex justify-between w-[95%] gap-3 my-2">
                         <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
                           <textarea
 
