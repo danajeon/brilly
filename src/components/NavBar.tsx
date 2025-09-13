@@ -20,7 +20,7 @@ export const NavBar = ({ isDemo, setIsDemo, user, setUser }: Props) => {
     const navigate = useNavigate();
 
     const handleLogo = () => {
-        navigate('/')
+        user ? navigate('/dashboard') : navigate('/')
     }
 
     const handleExitDemo = () => {
@@ -46,7 +46,7 @@ export const NavBar = ({ isDemo, setIsDemo, user, setUser }: Props) => {
         <div className="flex flex-row bg-white justify-between items-center sticky top-0">
             <div className="flex">
                 <img
-                    className="w-[100px] m-2 cursor-pointer"
+                    className="lg:w-[100px] md:w-[100px] w-[80px] m-2 cursor-pointer"
                     src={logo}
                     alt="logo"
                     onClick={() => handleLogo()}
@@ -55,20 +55,20 @@ export const NavBar = ({ isDemo, setIsDemo, user, setUser }: Props) => {
             <div className='flex items-center'>
                 {isDemo &&
                     <button
-                        className='text-red-500 text-xs bg-gray-200 hover:bg-gray-300 cursor-pointer rounded-md p-1 m-2 font-bold'
+                        className='text-red-500 text-xs bg-gray-200 hover:bg-gray-300 cursor-pointer rounded-md lg:p-2 p-1 lg:m-2 m-1 font-bold'
                         onClick={() => handleExitDemo()}
                     >Exit Demo Mode
                     </button>
                 }
                 {!user &&
                     <li 
-                        className="flex text-[#004D7C] mx-2 font-semibold items-center hover:cursor-pointer hover:underline"
+                        className="flex text-[#004D7C] lg:text-sm md:text-sm text-xs font-semibold items-center text-right mx-2 hover:cursor-pointer hover:underline"
                         onClick={() => handleAuth()}>
                             Log In | Sign Up
                     </li>
                 }
                 {user &&
-                    <ul className="flex gap-1 mx-2 text-[#004D7C] font-semibold items-center">
+                    <ul className="flex gap-1 mx-2 text-[#004D7C] lg:text-sm md:text-sm text-xs font-semibold items-center">
                         <li className="">{user.email}</li>
                         <span className=""> | </span>
                         <li 

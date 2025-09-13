@@ -62,28 +62,28 @@ const Elaborator = ({ flashcardContent, cardId, ai, onSaveElaboration }: Elabora
   return (
     <div className="bg-white rounded-md shadow-md space-y-4 p-2">
       <div className='flex justify-between items-center'>
-        <h2 className="font-semibold text-[#004D7C] text-md">Learning Assistant</h2>
+        <h2 className="font-semibold text-[#004D7C] lg:text-md md:text-sm text-xs px-2">Learning Assistant</h2>
         <button
           onClick={() => handleElaborate(flashcardContent)}
           className="flex items-center bg-[#88B1CA] text-white text-xs rounded-2xl p-1 px-3 gap-2 hover:bg-zinc-200 hover:text-black"
           disabled={loading}
         >
-          {loading ? 'Running...' : 'Need another explanation? Click to regenerate.'}
+          {loading ? 'Running...' : 'Elaborate with AI'}
           <div className='h-full'>
             <img
               src={aiImg}
               alt="aiImg"
-              className='h-[1.5rem]'
+              className='lg:h-[1.5rem] md:h-[1.4rem] h-[1.3rem]'
             />
           </div>
         </button>
       </div>
       <div className="min-h-[4rem] max-h-[9.5rem] bg-gray-50 rounded mt-4 p-3 overflow-scroll">
         {elaboration && (
-          <p className='text-sm'>{elaboration}</p>
+          <p className='lg:text-sm md:text-sm text-xs'>{elaboration}</p>
         )}
         {!elaboration && (
-          <p className='text-sm'>No elaboration yet.</p>
+          <p className='lg:text-sm md:text-sm text-xs'>No elaboration yet.</p>
         )}
       </div>
     </div>
