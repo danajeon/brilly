@@ -54,12 +54,13 @@ export default function AuthPage() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-[#f7f7f7]">
+        <div className="h-screen bg-[#88B1CA]">
+        <div className="flex flex-col items-center justify-start h-full pt-20">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white shadow-md p-6 rounded-md w-80"
+                className="bg-white shadow-md p-6 m-1 rounded-md w-75"
             >
-                <h1 className="text-xl font-bold mb-4">
+                <h1 className="lg:text-xl md:text-lg text-base font-bold mb-4">
                     {isLogin ? "Log In" : "Sign Up"}
                 </h1>
 
@@ -87,7 +88,7 @@ export default function AuthPage() {
 
                 <button
                     type="submit"
-                    className="w-full bg-[#004D7C] text-white p-2 rounded hover:bg-[#00629e]"
+                    className="w-full bg-[#004D7C] text-white p-2 rounded hover:bg-[#00629e] hover:cursor-pointer"
                 >
                     {isLogin ? "Log In" : "Sign Up"}
                 </button>
@@ -99,6 +100,7 @@ export default function AuthPage() {
                     {isLogin ? "Need an account? Sign Up" : "Already have an account? Log In"}
                 </p>
             </form>
+        </div>
         </div>
     );
 }

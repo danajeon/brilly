@@ -8,6 +8,7 @@ import LandingPage from './pages/LandingPage';
 import AuthPage from "./pages/AuthPage";
 import { NavBar } from './components/NavBar';
 import { createClient } from '@supabase/supabase-js';
+import { Footer } from './components/Footer';
 
 // Info needed to connect to Supabase
 const supabase = createClient(
@@ -63,6 +64,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard isDemo={isDemo} user={user} />} />
         <Route path="/auth" element={<AuthPage />} />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

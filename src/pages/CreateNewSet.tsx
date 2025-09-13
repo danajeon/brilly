@@ -303,21 +303,21 @@ export default function CreateNewSet({ isDemo, user }: Props) {
   return (
     <div className="h-screen overflow-y-hidden">
       <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
-        <div className="h-[95%] min-w-[75%]">
-          <div className="flex flex-row justify-start">
-            <h1 className="text-3xl text-[#004D7C] font-semibold mb-4">Create New Set</h1>
+        <div className="h-[95%] lg:min-w-[80%] md:min-w-[95%] min-w-[95%] flex flex-col items-center">
+          <div className="flex flex-row justify-start w-full">
+            <h1 className="lg:text-3xl md:text-2xl text-lg text-[#004D7C] font-semibold mb-3">Create New Set</h1>
           </div>
-          <div className="h-[70%] w-full bg-white rounded-lg shadow-xl p-6">
-            <div className="mb-2">
+          <div className="h-[75%] w-full bg-white rounded-lg shadow-xl lg:p-3 md:p-3 p-2 flex flex-col items-center">
+            <div className="mb-2 w-full">
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full bg-zinc-200 rounded-lg p-2"
+                className="w-full bg-zinc-200 rounded-lg lg:p-2 md:p-2 p-1"
               />
-              <span className="text-lg font-semibold text-[#004D7C]">Title</span>
+              <span className="lg:text-lg md:text-lg text-sm font-semibold text-[#004D7C]">Title</span>
             </div>
-            <div className="h-[80%] px-4 overflow-scroll">
+            <div className="w-full flex flex-col items-center lg:px-4 md:px-1 overflow-scroll">
               {cards.map((card, index) => {
                 const isDragging = index === dragIndex;
                 const isDragOver = index === dragOverIndex;
@@ -326,8 +326,8 @@ export default function CreateNewSet({ isDemo, user }: Props) {
                     key={index}
                     className={`flex items-center justify-between w-full transition-shadow ${isDragOver ? "border-t-2" : ""
                       } ${isDragging ? "opacity-60" : "opacity-100"}`}>
-                    <p className="flex w-[3%] justify-start items-center text-lg font-semibold text-[#004D7C]">{index + 1}</p>
-                    <div className="flex items-center flex-1 bg-[#88B1CA] rounded-lg shadow-md my-1">
+                    <p className="lg:flex md:flex hidden w-[3%] justify-start items-center lg:text-lg md:text-lg text-sm font-semibold text-[#004D7C]">{index + 1}</p>
+                    <div className="flex  flex-1 bg-[#88B1CA] rounded-lg shadow-md my-1">
                       <div 
                         draggable
                         onDragStart={(e) => handleDragStart(e, index)}
@@ -335,53 +335,59 @@ export default function CreateNewSet({ isDemo, user }: Props) {
                         onDragOver={handleDragOver}
                         onDrop={(e) => handleDrop(e, index)}
                         onDragEnd={handleDragEnd}
-                        className="text-sm h-full flex items-center text-zinc-300 p-1">
-                          <DensityMediumIcon className="hover:cursor-pointer"/>
+                        className="text-sm flex lg:flex-row md:flex-row
+                        flex-col items-center justify-evenly text-zinc-300 lg:p-1 md:p-1">
+                          <p className="lg:hidden md:hidden flex justify-start items-center lg:text-lg md:text-lg text-xs font-semibold text-[#004D7C]">{index + 1}</p>
+                          <DensityMediumIcon className="lg:scale-100 md:scale-80 scale-60 hover:cursor-pointer"/>
+                          <button
+                      onClick={() => deleteCard(index)}
+                      className="lg:hidden md:hidden block cursor-pointer z-1">
+                      <DeleteForeverIcon
+                        className="lg:scale-120 md:scale-100 scale-80 text-black hover:text-red-500" />
+                    </button>
                         </div>
                       
-                      <div className="flex justify-between w-[95%] gap-3 my-2">
-                        <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
+                      <div className="flex lg:flex-row md:flex-row flex-col justify-between w-[90%] lg:gap-3 md:gap-3 gap-1 my-1">
+                        <div className="flex-1 bg-white rounded-lg lg:p-2 md:p-2 p-1">
                           <textarea
-
                             value={card.front}
                             onChange={(e) => handleCardChange(index, "front", e.target.value)}
-                            className="w-full bg-zinc-200 rounded p-1 text-sm max-h-[200px] resize-none"
+                            className="w-full bg-zinc-200 rounded p-1 lg:text-sm md:text-sm text-xs max-h-[200px] resize-none"
                           />
-                          <span className="text-sm font-semibold">Front</span>
+                          <span className="lg:text-sm md:text-sm text-xs font-semibold">Front</span>
                         </div>
-                        <div className="w-[50%] flex-1 bg-white rounded-lg p-2">
+                        <div className="flex-1 bg-white rounded-lg lg:p-2 md:p-2 p-1">
                           <textarea
 
                             value={card.back}
                             onChange={(e) => handleCardChange(index, "back", e.target.value)}
-                            className=" w-full bg-zinc-200 rounded p-1 text-sm max-h-[200px] resize-none"
+                            className=" w-full bg-zinc-200 rounded p-1 lg:text-sm md:text-sm text-xs max-h-[200px] resize-none"
                           />
-                          <span className="text-sm font-semibold">Back</span>
+                          <span className="lg:text-sm md:text-sm text-xs font-semibold">Back</span>
                         </div>
                       </div>
                     </div>
                     <button
                       onClick={() => deleteCard(index)}
-                      className="cursor-pointer z-1">
+                      className="lg:block md:block hidden cursor-pointer z-1">
                       <DeleteForeverIcon
-                        fontSize="large"
-                        className="hover:text-red-500 " />
+                        className="lg:scale-120 md:scale-100 scale-80 hover:text-red-500" />
                     </button>
                   </div>
                 )
               })}
-              <button
+            </div>
+            <button
                 onClick={addNewCard}
-                className="w-full border-3 border-[#88B1CA] rounded-lg text-[#88B1CA] text-lg font-semibold p-2 mt-4 mb-4 hover:bg-blue-200 cursor-pointer"
+                className="lg:w-[70%] md:w-[70%] w-full border-3 border-[#88B1CA] rounded-lg text-[#88B1CA] lg:text-lg md:text-lg text-sm font-semibold p-1 mt-2 hover:bg-blue-200 cursor-pointer"
               >
                 Add New +
               </button>
-            </div>
           </div>
           <button
             onClick={handleCreate}
             disabled={loading}
-            className="w-full bg-[#004D7C] text-white text-lg font-semibold rounded-lg shadow-xl mt-4 mb-8 p-3 hover:bg-white hover:text-[#004D7C] border-[#004D7C] disabled:opacity-50 cursor-pointer"
+            className="lg:w-[70%] md:w-[70%] w-full bg-[#004D7C] text-white lg:text-lg md:text-lg text-sm font-semibold rounded-lg shadow-xl mt-4 mb-8 p-1 hover:bg-white hover:text-[#004D7C] border-[#004D7C] disabled:opacity-50 cursor-pointer"
           >
             {loading ? "Creating..." : "Create"}
           </button>

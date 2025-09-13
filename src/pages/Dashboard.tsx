@@ -38,11 +38,11 @@ export default function Dashboard({ isDemo, user }: Props) {
   const navigate = useNavigate();
 
   const at = user ? user.email.indexOf("@") : null
-  const trimmed = user ? user.email.slice(0,at) : null
+  const trimmed = user ? user.email.slice(0, at) : null
 
   // Forces user to Landing Page if not demo or not signed in
   useEffect(() => {
-    if(!isDemo && !user) {
+    if (!isDemo && !user) {
       navigate("/")
     }
   }, [])
@@ -98,7 +98,7 @@ export default function Dashboard({ isDemo, user }: Props) {
   }
 
   const handleCreateNewSet = () => {
-      navigate('/createnewset')
+    navigate('/createnewset')
   }
 
   const handleSetDelete = async (cardSet: CardSet) => {
@@ -168,21 +168,24 @@ export default function Dashboard({ isDemo, user }: Props) {
 
   return (
     <div className="h-screen overflow-y-hidden">
-      
+
       <div className="h-full w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
-        <div className="min-h-[95%] max-w-[75%]">
-          <h1 className="text-3xl font-semibold text-white mb-4">Welcome{user ? `, ${trimmed}` : ''}</h1>
-          <span className='text-3xl font-semibold text-[#004D7C]'>{ }</span>
-          <div className='h-[75%] w-full flex flex-row justify-between gap-3'>
-            <div className="h-full w-[80%] bg-white rounded-lg shadow-xl px-6 py-2 overflow-y-scroll flex flex-col items-end">
+        <div className="min-h-[95%] lg:max-w-[75%]
+        md:max-w-[95%]">
+          <h1 className="lg:text-3xl md:text-3xl text-xl font-semibold text-white mx-3 mb-4">Welcome{user ? `, ${trimmed}` : ''}</h1>
+          <div className='lg:h-[75%] md:h-[75%] h-[80%] w-full flex lg:flex-row 
+          md:flex-row flex-col 
+          items-center lg:justify-between  md:justify-between gap-1'>
+            <div className="lg:h-full md:h-full h-[80%] lg:w-[80%] md:w-[80%] w-[95%] bg-white rounded-lg shadow-xl px-4 py-2 overflow-y-scroll flex flex-col items-end gap-1"> 
               <button
-                className="relative w-[120px] border bg-gray-100 hover:bg-gray-200 text-xs px-3 py-2 text-left shadow-sm rounded-sm"
+                className="flex relative w-[100px] hover:bg-slate-200 bg-slate-100 text-xs px-3 py-1 text-left shadow-md rounded-sm justify-between z-3" 
                 onClick={() => setSortOpen(!sortOpen)}
               >
-                Sort by:
+                Sort by
+                {sortOpen ? <span>▲</span> : <span>▼</span>}
                 {/* Dropdown Menu */}
                 {sortOpen && (
-                  <div className="absolute left-0 mt-3 w-full bg-white border shadow-lg z-50 rounded-sm">
+                  <div className="absolute left-0 mt-6 w-full bg-slate-100 shadow-md z-6 rounded-sm">
                     <div
                       className="px-3 py-2 hover:bg-[#88B1CA] cursor-pointer"
                       onClick={() => handleCardSetSortByDateDesc()}
@@ -210,7 +213,8 @@ export default function Dashboard({ isDemo, user }: Props) {
                   </div>
                 )}
               </button>
-              <div className='w-full grid grid-cols-4 gap-4'>
+              {/* lg and md */}
+              <div className='w-full lg:grid md:grid hidden lg:grid-cols-4 md:grid-cols-3 gap-4'>
                 <div className='flex flex-col items-center justify-between bg-white border-3 border-transparent hover:border-[#88B1CA] rounded-md p-4 aspect-1/1 cursor-pointer'>
                   <div
                     className='flex justify-center items-center h-7/10'
@@ -220,12 +224,12 @@ export default function Dashboard({ isDemo, user }: Props) {
                       className="w-[70%] shadow-md">
                     </img>
                   </div>
-                  <span className="text-md font-medium">Create New Set</span>
+                  <span className="text-sm text-center">Create New Set</span>
                 </div>
-                {cardSetArray.map((cardSet) => (
+                {cardSetArray.map((cardSet, i) => (
                   <div
                     key={cardSet.id}
-                    className='flex flex-col items-center justify-between bg-white border-3 border-transparent hover:border-[#88B1CA] rounded-md p-4 aspect-1/1 cursor-pointer relative'
+                    className={`flex flex-col items-center justify-between border-3 border-transparent hover:border-[#88B1CA] rounded-md p-4 aspect-1/1 cursor-pointer relative ${i%2 ? 'bg-white':'bg-slate-100'}`}
                     onClick={() => handleCardSetClick(cardSet.id)}
                     onMouseEnter={() => setHoveredCardSet(cardSet)}
                     onMouseLeave={() => setHoveredCardSet(null)}>
@@ -235,7 +239,7 @@ export default function Dashboard({ isDemo, user }: Props) {
                         className="w-[80%]">
                       </img>
                     </div>
-                    <p className="text-md font-medium w-full text-center line-clamp-2">{cardSet.title}</p>
+                    <p className="text-sm font-medium w-full text-center line-clamp-2">{cardSet.title}</p>
                     <button
                       className={`absolute top-0 right-0 p-1 aspect-1/1 flex justify-center items-center z-4 hover:text-red-500 cursor-pointer ${hoveredCardSet === cardSet ? 'opacity-100' : 'opacity-0'}`}
                       onClick={(e) => {
@@ -247,20 +251,60 @@ export default function Dashboard({ isDemo, user }: Props) {
                     </button>
                   </div>
                 ))}
-              </div>
-            </div>
-            <div className='w-[20%] flex flex-col bg-[#004D7C] rounded-md p-6 text-white'>
-              {hoveredCardSet ?
-                <div>
-                  <p className="font-semibold text-lg pb-2">{hoveredCardSet?.title}</p>
-                  <p className='text-xs pb-5'>Created on {isoTime}</p>
-                  <p className=''>{hoveredCardSet?.quantity} cards</p>
                 </div>
-                : ''}
+                {/* sm */} 
+                <div className='w-full lg:hidden md:hidden grid grid-cols-1 gap-2 my-3'>
+                  <div className='flex w-full border-transparent bg-[#004D7C] rounded-md cursor-pointer justify-center items-center text-white p-2'
+                  onClick={() => handleCreateNewSet()}>
+                    <span className="text-xs">Create New Set</span>
+                  </div>
+                  {cardSetArray.map((cardSet, i) => (
+                    <div
+                      key={cardSet.id}
+                      className={`flex items-center justify-between border-2 border-transparent cursor-pointer relative p-1 ${i%2 ? 'bg-white':'bg-slate-200'}`}
+                      onClick={() => handleCardSetClick(cardSet.id)}
+                      onMouseEnter={() => setHoveredCardSet(cardSet)}
+                      onMouseLeave={() => setHoveredCardSet(null)}>
+                      <div className="h-full w-[20%] flex items-center">
+                        <img
+                          src={cardsImg}
+                          className="w-full">
+                        </img>
+                      </div>
+                      <div className='flex-col w-[65%]'>
+                        <p className="text-xs font-semibold w-full text-left break-words">{cardSet.title}</p>
+                        <div className='text-xs flex gap-6'>
+                          <p>{new Date(cardSet.created).toLocaleDateString()}</p>
+                          <p>{cardSet.quantity} {cardSet.quantity > 1 ? " cards" : " card"}</p>
+                        </div>
+                      </div>
+                      <button
+                        className={`w-[10%] aspect-1/1 flex justify-center items-center z-2 hover:text-red-500 cursor-pointer`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSetDelete(cardSet);
+                        }}
+                      >
+                        <DeleteForeverIcon fontSize='small' />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              
+              </div>
+              <div className='lg:w-[20%] md:w-[20%] lg:h-full md:h-full h-1/10 lg:flex md:flex hidden flex-col bg-[#004D7C] rounded-md lg:p-6 md:p-3 text-white'>
+                {hoveredCardSet ?
+                  <div className="flex flex-col pb-2 gap-4">
+                    <p className="font-semibold lg:text-lg text-sm break-words">{hoveredCardSet?.title}</p>
+                    <p className='text-xs'>Created on {isoTime}</p>
+                    <p className=''>{hoveredCardSet?.quantity} cards</p>
+                  </div>
+                  : ''}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div >
+      </div >
+
   );
 }

@@ -196,41 +196,41 @@ export default function Flashcards({ isDemo }: { isDemo: boolean }) {
 
 
     return (
-        <div className={`h-screen overflow-y-hidden ${cardsArray.length > 0 ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`lg:h-screen h-full overflow-y-hidden bg-[#88B1CA] ${cardsArray.length > 0 ? 'opacity-100' : 'opacity-0'}`}>
 
-            <div className="h-[95%] w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
-                <div className="flex flex-row h-full w-[70%] gap-8 mt-8">
+            <div className="lg:h-[95%] w-screen flex flex-col items-center justify-center">
+                <div className="flex lg:flex-row flex-col lg:h-full lg:max-w-[75%] w-full lg:items-start items-center lg:gap-8 md:gap-3 gap-0 lg:mt-8 lg:mb-0 my-4">
                     {/* left side */}
-                    <div className='h-[80%] w-1/2'>
-                        <h1 className='w-full text-xl text-[#004D7C] font-semibold text-left line-clamp-2 mb-2'>{title}</h1>
+                    <div className='lg:h-[80%] lg:w-1/2 md:w-[65%] w-[95%]'>
+                        <h1 className='w-full lg:text-2xl md:text-2xl text-lg text-[#004D7C] font-semibold text-left line-clamp-2 mb-2'>{title}</h1>
                         <div className='flex justify-center items-center'>
-                            <div className="w-[90%] aspect-5/3 bg-white rounded-md shadow-lg/50">
+                            <div className="w-[100%] aspect-5/3 bg-white rounded-md shadow-lg/50">
 
                                 {showFront ?
                                     // CARD FRONT
                                     <div
-                                        className="w-full h-full flex justify-center items-center text-center text-4xl p-4"
+                                        className="w-full h-full flex justify-center items-center text-center lg:text-3xl md:text-3xl text-lg  p-4"
                                         onClick={() => setShowFront(false)}>
                                         <span>{front}</span>
                                     </div>
                                     :
                                     // CARD BACK
                                     <div
-                                        className="w-full h-full flex justify-center items-center text-center text-2xl p-4"
+                                        className="w-full h-full flex justify-center items-center text-center lg:text-2xl md:text-lg text-sm p-4"
                                         onClick={() => setShowFront(true)}>
                                         <span>{back}</span>
                                     </div>
                                 }
                             </div>
                         </div>
-                        <div className='flex justify-evenly items-center p-2'>
+                        <div className='flex justify-evenly items-center lg:p-2 md:p-4 p-3'>
                             <button
                                 className={`text-[#004D7C] active:scale-90 ${disableBackButton ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}`}
                                 onClick={() => minusOne()}
                                 disabled={disableBackButton}>
                                 <ArrowCircleLeftIcon />
                             </button>
-                            <span className='font-semibold text-[#004D7C] text-md font-bold'>
+                            <span className='font-semibold text-[#004D7C] lg:text-md text-sm font-bold'>
                                 {cardIndex + 1}/{cardsArray.length}
                             </span>
                             <button
@@ -240,7 +240,7 @@ export default function Flashcards({ isDemo }: { isDemo: boolean }) {
                                 <ArrowCircleRightIcon />
                             </button>
                         </div>
-                        <div className='w-full aspect-5/3 rounded-md'>
+                        <div className='w-full lg:aspect-5/3 rounded-md lg:pb-0 pb-5'>
                             {cardsArray.length > 0 && (
                                 <Elaborator
                                     flashcardContent={front}
@@ -253,7 +253,7 @@ export default function Flashcards({ isDemo }: { isDemo: boolean }) {
                     </div>
 
                     {/* right side */}
-                    <div className='h-[85%] w-1/2 bg-[#004D7C] border border-white border-2 rounded-md px-4'>
+                    <div className='lg:h-[90%] h-[500px] lg:w-1/2 md:w-[65%] w-[95%] bg-[#004D7C] border border-white border-2 rounded-md lg:px-4 px-3 lg:mb-0 md:mb-0 mb-5'>
                         <div className='flex justify-between py-2 text-white'>
                             <div
                                 className='hover:cursor-pointer'
@@ -270,20 +270,22 @@ export default function Flashcards({ isDemo }: { isDemo: boolean }) {
                             </div>
                         </div>
                         <div className='h-[90%] overflow-y-scroll pr-3'>
-                            <div className='flex flex-col gap-1'>
+                            <div className='flex flex-col gap-1 overflow-scroll'>
                                 {cardsArray.length === 0 && (
                                     <p className="text-gray-700">No cards found.</p>)}
                                 {cardsArray.map((card, i) => (
                                     <div
                                         key={card.id}
-                                        className={`rounded-md flex p-3 gap-2 cursor-pointer ${i === cardIndex ? 'bg-[#88B1CA]' : 'bg-zinc-200'}`}
+                                        className={`rounded-md flex lg:p-3 p-2 gap-2 cursor-pointer ${i === cardIndex ? 'bg-[#88B1CA]' : 'bg-zinc-200'}`}
                                         onClick={() => {
                                             setCardIndex(i)
                                         }}>
-                                        <div className="min-w-[25%]  aspect-5/3 bg-white rounded-md flex justify-center items-center">
-                                            <p className="m-3 text-sm font-medium text-center">{card.front}</p>
+                                        <div className="lg:w-[30%] w-[25%] aspect-5/3 bg-white rounded-md flex justify-center items-center">
+                                            <p className=" lg:text-sm text-xs font-medium text-center">{card.front}</p>
                                         </div>
-                                        <p className="text-sm text-black my-4 line-clamp-2">{card.back}</p>
+                                        <div className="w-[65%] flex justify-start items-center">
+                                            <p className=" lg:text-sm text-xs text-black  line-clamp-2">{card.back}</p>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
