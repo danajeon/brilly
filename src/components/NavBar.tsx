@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.webp'
-import { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 type Props = {
@@ -12,8 +11,8 @@ type Props = {
 
 // Info needed to connect to Supabase
 const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
 export const NavBar = ({ isDemo, setIsDemo, user, setUser }: Props) => {
@@ -33,14 +32,14 @@ export const NavBar = ({ isDemo, setIsDemo, user, setUser }: Props) => {
     }
 
     const handlesmolpp = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-        console.error("Logout error:", error.message);
-    } else {
-        setUser(null); // update App state
-        navigate('/'); // redirect to home
-    }
-};
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.error("Logout error:", error.message);
+        } else {
+            setUser(null); // update App state
+            navigate('/'); // redirect to home
+        }
+    };
 
     return (
         <div className="flex flex-row bg-white justify-between items-center sticky top-0">
@@ -61,20 +60,20 @@ export const NavBar = ({ isDemo, setIsDemo, user, setUser }: Props) => {
                     </button>
                 }
                 {!user &&
-                    <li 
+                    <li
                         className="flex text-[#004D7C] lg:text-sm md:text-sm text-xs font-semibold items-center text-right mx-2 hover:cursor-pointer hover:underline"
                         onClick={() => handleAuth()}>
-                            Log In | Sign Up
+                        Log In | Sign Up
                     </li>
                 }
                 {user &&
                     <ul className="flex gap-1 mx-2 text-[#004D7C] lg:text-sm md:text-sm text-xs font-semibold items-center">
                         <li className="">{user.email}</li>
                         <span className=""> | </span>
-                        <li 
+                        <li
                             className="hover:cursor-pointer hover:underline"
                             onClick={() => handlesmolpp()}>
-                                    Log Out
+                            Log Out
                         </li>
                     </ul>
                 }

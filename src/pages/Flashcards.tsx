@@ -8,7 +8,6 @@ import ArrowCircleLeftIcon from '@mui/icons-material/ArrowCircleLeft';
 import ArrowCircleRightIcon from '@mui/icons-material/ArrowCircleRight';
 import ShuffleIcon from '@mui/icons-material/Shuffle';
 import ShuffleOnIcon from '@mui/icons-material/ShuffleOn';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 // Info needed to connect to Supabase
 const supabase = createClient(
