@@ -31,7 +31,7 @@ export const NavBar = ({ isDemo, setIsDemo, user, setUser }: Props) => {
         navigate('/auth')
     }
 
-    const handlesmolpp = async () => {
+    const handleLogOut = async () => {
         const { error } = await supabase.auth.signOut();
         if (error) {
             console.error("Logout error:", error.message);
@@ -72,7 +72,7 @@ export const NavBar = ({ isDemo, setIsDemo, user, setUser }: Props) => {
                         <span className=""> | </span>
                         <li
                             className="hover:cursor-pointer hover:underline"
-                            onClick={() => handlesmolpp()}>
+                            onClick={() => handleLogOut()}>
                             Log Out
                         </li>
                     </ul>

@@ -62,7 +62,7 @@ function App() {
         <Route path="/flashcards/:postId" element={<Flashcards isDemo={isDemo} />} />
         <Route path="/createnewset" element={<CreateNewSet isDemo={isDemo} user={user} />} />
         <Route path="/dashboard" element={<Dashboard isDemo={isDemo} user={user} />} />
-        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/auth" element={<AuthPage setIsDemo={setIsDemo} />} />
       </Routes>
       <Footer />
     </BrowserRouter>

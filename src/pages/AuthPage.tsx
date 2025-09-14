@@ -8,7 +8,11 @@ const supabase = createClient(
     import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
-export default function AuthPage() {
+type Props = {
+  setIsDemo: (value: boolean) => void
+};
+
+export default function AuthPage({setIsDemo }: Props) {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -29,6 +33,7 @@ export default function AuthPage() {
                 setErrorMsg(error.message);
             } else {
                 if (data.session) {
+                    setIsDemo(false)
                     navigate("/dashboard");
                 }
             }
