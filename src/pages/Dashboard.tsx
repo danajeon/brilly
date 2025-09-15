@@ -171,7 +171,7 @@ export default function Dashboard({ isDemo, user }: Props) {
 
       <div className="h-full w-screen flex flex-col items-center justify-center bg-[#88B1CA]">
         <div className="min-h-[95%] lg:max-w-[75%]
-        md:max-w-[95%]">
+        md:max-w-[95%] w-full">
           <h1 className="lg:text-3xl md:text-3xl text-xl font-semibold text-white mx-3 mb-4">Welcome{user ? `, ${trimmed}` : ''}</h1>
           <div className='lg:h-[75%] md:h-[75%] h-[80%] w-full flex lg:flex-row 
           md:flex-row flex-col 
