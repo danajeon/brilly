@@ -22,7 +22,7 @@ export default function LandingPage({ setIsDemo }: Props) {
     
     return (
         <div className=''>
-            <div className='bg-[#88B1CA]'>
+            <div className='bg-[#88B1CA] flex flex-col justify-center items-center'>
                 <div className="max-w-[1600px] flex justify-center items-center 
                     lg:flex-row md:flex-row flex-col
                     lg:gap-6 md:gap-3">
@@ -56,7 +56,7 @@ export default function LandingPage({ setIsDemo }: Props) {
                         />
                     </div>
                 </div>
-                <div className="max-w-[1600px] flex flex-col bg-white 
+                <div className="w-screen flex flex-col bg-white 
                     lg:py-15 md:py-10 py-7">
                     <h3 className="flex flex-col items-center text-[#004D7C] font-semibold text-center mx-3 pb-5
                     lg:text-3xl md:text-3xl text-xl
@@ -88,11 +88,11 @@ export default function LandingPage({ setIsDemo }: Props) {
                         </div>
                     </div>
                 </div>
-                <div className="max-w-[1600px] flex flex-col bg-[#004D7C] items-center gap-4 py-8">
+                <div className="w-screen flex flex-col bg-[#004D7C] items-center gap-4 py-8">
                     <img
                         src={sc1Img}
                         alt="sc1"
-                        className="w-[70%]"
+                        className="max-w-[50%]"
                     />
                     <p className="w-[80%] text-white text-center lg:text-2xl md:text-xl text-md">For additional definitions or explanations, select the Elaborate<img
                         src={aiImg}
@@ -102,7 +102,7 @@ export default function LandingPage({ setIsDemo }: Props) {
                     <img
                         src={sc2Img}
                         alt="sc2"
-                        className="w-[60%]"
+                        className="max-w-[50%]"
                     />
                 </div>
             </div>
