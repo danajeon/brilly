@@ -24,7 +24,7 @@ serve(
         Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4.1-mini",
         messages: [
           { role: "system", content: "You elaborate on content." },
           { role: "user", content: `Elaborate in very simple terms on: ${text}` },
